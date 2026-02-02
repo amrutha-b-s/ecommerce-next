@@ -1,19 +1,16 @@
-export const dynamic = "force-dynamic";
+"use client";
 
-async function getProducts() {
-  const res = await fetch("https://fakestoreapi.com/products", {
-    cache: "no-store",
-  });
+import { useEffect, useState } from "react";
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
+export default function Home() {
+  const [products, setProducts] = useState([]);
 
-  return res.json();
-}
-
-export default async function Home() {
-  const products = await getProducts();
+  useEffect(() => {
+    fetch("https://fakestoreapi.com/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <main className="p-6">

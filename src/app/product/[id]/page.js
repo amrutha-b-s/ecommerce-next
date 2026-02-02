@@ -1,23 +1,23 @@
-export const dynamic = "force-dynamic";
+"use client";
 
-async function getProduct(id) {
-  const res = await fetch(
-    `https://fakestoreapi.com/products/${id}`,
-    { cache: "no-store" }
-  );
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-  if (!res.ok) {
-    return null;
-  }
+export default function ProductPage() {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
 
-  return res.json();
-}
+  useEffect(() => {
+    if (!id) return;
 
-export default async function ProductPage({ params }) {
-  const product = await getProduct(params.id);
+    fetch(`https://fakestoreapi.com/products/${id}`)
+      .then((res) => res.json())
+      .then((data) => setProduct(data))
+      .catch((err) => console.error(err));
+  }, [id]);
 
   if (!product) {
-    return <h1 className="p-6">Product not found</h1>;
+    return <p className="p-6">Loading...</p>;
   }
 
   return (
