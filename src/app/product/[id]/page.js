@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function ProductPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
@@ -12,9 +13,16 @@ export default function ProductPage() {
 
     fetch(`https://fakestoreapi.com/products/${id}`)
       .then((res) => res.json())
-      .then((data) => setProduct(data))
-      .catch((err) => console.error(err));
+      .then((data) => setProduct(data));
   }, [id]);
+
+  function addToCart() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(product);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Added to cart");
+    router.push("/cart");
+  }
 
   if (!product) {
     return <p className="p-6">Loading...</p>;
@@ -40,7 +48,10 @@ export default function ProductPage() {
         ₹ {product.price}
       </p>
 
-      <button className="mt-6 px-6 py-2 bg-black text-white rounded">
+      <button
+        onClick={addToCart}
+        className="mt-6 px-6 py-2 bg-black text-white rounded"
+      >
         Add to Cart
       </button>
     </main>
