@@ -6,6 +6,7 @@ import Link from "next/link";
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
@@ -16,44 +17,56 @@ export default function Home() {
       })
       .catch((err) => {
         console.error(err);
+        setError(true);
         setLoading(false);
       });
   }, []);
 
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Products</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Products</h1>
 
-      {loading && <p>Loading products...</p>}
+      {/* Loading state */}
+      {loading && (
+        <p className="text-center text-gray-500">Loading products...</p>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="border p-4 rounded hover:shadow-lg transition"
-          >
-            <img
-              src={product.image}
-              alt={product.title}
-              className="h-40 mx-auto object-contain"
-            />
+      {/* Error state */}
+      {error && (
+        <p className="text-center text-red-600">
+          Failed to load products. Please try again later.
+        </p>
+      )}
 
-            <h2 className="mt-3 font-semibold text-sm">
-              {product.title}
-            </h2>
+      {/* Products grid */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="border rounded-lg p-4 hover:shadow-lg transition"
+            >
+              <img
+                src={product.image}
+                alt={product.title}
+                className="h-40 mx-auto object-contain"
+              />
 
-            <p className="font-bold mt-2">
-              ₹ {product.price}
-            </p>
+              <h2 className="mt-3 text-sm font-semibold line-clamp-2">
+                {product.title}
+              </h2>
 
-            <Link href={`/product/${product.id}`}>
-              <button className="mt-3 px-4 py-2 bg-black text-white rounded">
-                View Product
-              </button>
-            </Link>
-          </div>
-        ))}
-      </div>
+              <p className="font-bold mt-2">₹ {product.price}</p>
+
+              <Link href={`/product/${product.id}`}>
+                <button className="mt-3 w-full bg-black text-white py-2 rounded">
+                  View Product
+                </button>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
