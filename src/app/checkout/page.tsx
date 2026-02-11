@@ -1,7 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -9,115 +9,101 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [paymentMode, setPaymentMode] = useState("COD");
   const [error, setError] = useState("");
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  // 🚫 Redirect if cart empty
-  useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    if (cart.length === 0) {
-      router.push("/");
-    }
-  }, []);
-
-  const placeOrder = () => {
-    if (!name.trim() || !address.trim() || !phone.trim()) {
-      setError("Please fill all fields.");
+  const handleSubmit = () => {
+    if (!name || !address || !phone) {
+      setError("⚠️ Please fill all fields!");
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-    const total = cart.reduce(
-      (sum: number, item: any) =>
-        sum + item.price * item.quantity,
-      0
-    );
-
-    const existingOrders = JSON.parse(
-      localStorage.getItem("orders") || "[]"
-    );
-
-    const newOrder = {
-      id: Date.now(),
-      date: new Date().toLocaleString(),
-      items: cart,
-      total,
-      status: "Processing",
-      paymentMode,
-    };
-
-    localStorage.setItem(
-      "orders",
-      JSON.stringify([...existingOrders, newOrder])
-    );
-
-    localStorage.removeItem("cart");
-
-    // update navbar count
-    window.dispatchEvent(new Event("storage"));
-
+    setError("");
     setOrderPlaced(true);
-
-    setTimeout(() => {
-      router.push("/orders");
-    }, 1500);
   };
 
-  return (
-    <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+  // ✅ SUCCESS SCREEN
+  if (orderPlaced) {
+    return (
+      <main style={{ padding: "40px", textAlign: "center" }}>
+        <h1>Checkout</h1>
 
-      {orderPlaced ? (
-        <h2 className="text-green-600 text-xl">
+        <img
+          src="/cat-success.png"
+          alt="Success Cat"
+          style={{ width: "200px", margin: "20px auto" }}
+        />
+
+        <h2 style={{ color: "green" }}>
           🎉 Order placed successfully!
         </h2>
-      ) : (
-        <>
-          <input
-            placeholder="Full Name"
-            className="border p-2 w-full mb-3"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
 
-          <input
-            placeholder="Address"
-            className="border p-2 w-full mb-3"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            marginTop: "20px",
+            padding: "10px 20px",
+            backgroundColor: "#2563eb",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Continue Shopping 🛍️
+        </button>
+      </main>
+    );
+  }
 
-          <input
-            placeholder="Phone"
-            className="border p-2 w-full mb-3"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+  // ✅ FORM SCREEN
+  return (
+    <main style={{ padding: "40px", maxWidth: "400px", margin: "auto" }}>
+      <h1>Checkout</h1>
 
-          <select
-            className="border p-2 w-full mb-3"
-            value={paymentMode}
-            onChange={(e) => setPaymentMode(e.target.value)}
-          >
-            <option value="COD">Cash on Delivery</option>
-            <option value="UPI">UPI</option>
-            <option value="Card">Card</option>
-          </select>
+      <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ padding: "10px" }}
+        />
 
-          {error && (
-            <p className="text-red-600 mb-3">{error}</p>
-          )}
+        <input
+          type="text"
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          style={{ padding: "10px" }}
+        />
 
-          <button
-            onClick={placeOrder}
-            className="w-full bg-green-600 text-white py-2"
-          >
-            Place Order
-          </button>
-        </>
-      )}
+        <input
+          type="tel"
+          placeholder="Phone Number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          style={{ padding: "10px" }}
+        />
+
+        {error && (
+          <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>
+        )}
+
+        <button
+          onClick={handleSubmit}
+          style={{
+            padding: "12px",
+            backgroundColor: "green",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Place Order
+        </button>
+      </div>
     </main>
   );
 }
