@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -9,29 +9,60 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [paymentMode, setPaymentMode] = useState("COD");
   const [error, setError] = useState("");
   const [orderPlaced, setOrderPlaced] = useState(false);
 
+  // 🚫 Redirect if cart empty
+  useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (cart.length === 0) {
+      router.push("/");
+    }
+  }, []);
+
   const placeOrder = () => {
-    // Basic validation
     if (!name.trim() || !address.trim() || !phone.trim()) {
-      setError("Please fill all fields before placing the order.");
+      setError("Please fill all fields.");
       return;
     }
 
-    // Clear error
-    setError("");
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    // Clear cart
+    const total = cart.reduce(
+      (sum: number, item: any) =>
+        sum + item.price * item.quantity,
+      0
+    );
+
+    const existingOrders = JSON.parse(
+      localStorage.getItem("orders") || "[]"
+    );
+
+    const newOrder = {
+      id: Date.now(),
+      date: new Date().toLocaleString(),
+      items: cart,
+      total,
+      status: "Processing",
+      paymentMode,
+    };
+
+    localStorage.setItem(
+      "orders",
+      JSON.stringify([...existingOrders, newOrder])
+    );
+
     localStorage.removeItem("cart");
 
-    // Show success
+    // update navbar count
+    window.dispatchEvent(new Event("storage"));
+
     setOrderPlaced(true);
 
-    // Redirect after 2 seconds
     setTimeout(() => {
-      router.push("/");
-    }, 2000);
+      router.push("/orders");
+    }, 1500);
   };
 
   return (
@@ -45,28 +76,35 @@ export default function CheckoutPage() {
       ) : (
         <>
           <input
-            type="text"
             placeholder="Full Name"
+            className="border p-2 w-full mb-3"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 w-full mb-3 rounded"
           />
 
           <input
-            type="text"
             placeholder="Address"
+            className="border p-2 w-full mb-3"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="border p-2 w-full mb-3 rounded"
           />
 
           <input
-            type="text"
-            placeholder="Phone Number"
+            placeholder="Phone"
+            className="border p-2 w-full mb-3"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="border p-2 w-full mb-3 rounded"
           />
+
+          <select
+            className="border p-2 w-full mb-3"
+            value={paymentMode}
+            onChange={(e) => setPaymentMode(e.target.value)}
+          >
+            <option value="COD">Cash on Delivery</option>
+            <option value="UPI">UPI</option>
+            <option value="Card">Card</option>
+          </select>
 
           {error && (
             <p className="text-red-600 mb-3">{error}</p>
@@ -74,7 +112,7 @@ export default function CheckoutPage() {
 
           <button
             onClick={placeOrder}
-            className="w-full px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+            className="w-full bg-green-600 text-white py-2"
           >
             Place Order
           </button>
