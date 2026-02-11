@@ -1,94 +1,159 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
-/* Cart item type */
-type CartItem = {
+interface CartItem {
   id: number;
   title: string;
   price: number;
   image: string;
-};
+  quantity: number;
+}
 
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Load cart from localStorage
+  // LOAD CART
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
+    const stored = localStorage.getItem("cart");
+
+    if (stored) {
+      const parsed = JSON.parse(stored);
+
+      // Make sure quantity always exists
+      const updated = parsed.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        price: Number(item.price),
+        image: item.image,
+        quantity: item.quantity ? Number(item.quantity) : 1,
+      }));
+
+      setCart(updated);
     }
   }, []);
 
-  // Clear cart
-  const clearCart = () => {
-    localStorage.removeItem("cart");
-    setCart([]);
+  // SAVE CART
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  // INCREASE
+  const increaseQty = (id: number) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
   };
 
-  // Calculate total price
+  // DECREASE
+  const decreaseQty = (id: number) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
+  };
+
+  // REMOVE
+  const removeItem = (id: number) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // CLEAR CART
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
+
+  // CALCULATE TOTAL
   const totalPrice = cart.reduce(
-    (sum, item) => sum + item.price,
+    (total, item) => total + item.price * item.quantity,
     0
   );
 
-  // EMPTY CART UI
-  if (cart.length === 0) {
-    return (
-      <main className="p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
-        <p className="text-gray-500 mb-6">Your cart is empty 🛒</p>
-
-        <Link
-          href="/"
-          className="inline-block bg-black text-white px-6 py-2 rounded"
-        >
-          Go to Products
-        </Link>
-      </main>
-    );
-  }
-
-  // CART WITH ITEMS
   return (
-    <main className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
+    <main className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
 
-      <div className="space-y-4">
-        {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center gap-4 border p-4 rounded"
-          >
+      {cart.length === 0 && (
+        <p className="text-gray-500">Cart is empty</p>
+      )}
+
+      {cart.map((item) => (
+        <div
+          key={item.id}
+          className="border p-4 mb-4 rounded flex items-center justify-between"
+        >
+          <div className="flex items-center gap-4">
             <img
               src={item.image}
               alt={item.title}
-              className="w-20 h-20 object-contain"
+              className="h-20 object-contain"
             />
 
             <div>
               <h2 className="font-semibold">{item.title}</h2>
-              <p className="text-gray-600">₹ {item.price}</p>
+              <p>₹ {item.price}</p>
+
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => decreaseQty(item.id)}
+                  className="px-3 py-1 bg-gray-300 rounded"
+                >
+                  -
+                </button>
+
+                <span>{item.quantity}</span>
+
+                <button
+                  onClick={() => increaseQty(item.id)}
+                  className="px-3 py-1 bg-gray-300 rounded"
+                >
+                  +
+                </button>
+
+                <button
+                  onClick={() => removeItem(item.id)}
+                  className="ml-4 px-4 py-1 bg-red-500 text-white rounded"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
-      {/* Total + Clear Cart */}
-      <div className="mt-6 flex justify-between items-center">
-        <p className="text-lg font-semibold">
-          Total: ₹ {totalPrice.toFixed(2)}
-        </p>
+      {cart.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold mt-6">
+            Total: ₹ {totalPrice.toFixed(2)}
+          </h2>
 
-        <button
-          onClick={clearCart}
-          className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-        >
-          Clear Cart
-        </button>
-      </div>
+          <button
+            onClick={clearCart}
+            className="mt-4 px-6 py-2 bg-black text-white rounded"
+          >
+            Clear Cart
+          </button>
+
+          <div className="flex gap-4 mt-4">
+            <button className="px-6 py-2 bg-blue-600 text-white rounded">
+              Review Order
+            </button>
+
+            <button className="px-6 py-2 bg-green-600 text-white rounded">
+              Proceed to Checkout
+            </button>
+          </div>
+        </>
+      )}
     </main>
   );
 }
