@@ -14,77 +14,82 @@ interface Product {
 export default function ProductPage() {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
+
     fetch(`https://fakestoreapi.com/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data));
+      .then((res) => res.json())
+      .then((data) => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch((err) => console.error(err));
   }, [id]);
 
   const addToCart = () => {
     if (!product) return;
 
-    const storedCart = localStorage.getItem("cart");
-    const cart = storedCart ? JSON.parse(storedCart) : [];
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    const existingItem = cart.find(
+    const existingItemIndex = existingCart.findIndex(
       (item: any) => item.id === product.id
     );
 
-    if (existingItem) {
-      const updatedCart = cart.map((item: any) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    if (existingItemIndex !== -1) {
+      // If product already exists → increase quantity
+      existingCart[existingItemIndex].quantity += 1;
     } else {
-      const newItem = {
+      // If new product → add with quantity 1
+      existingCart.push({
         id: product.id,
         title: product.title,
         price: product.price,
         image: product.image,
-        quantity: 1, // 🔥 important
-      };
-
-      localStorage.setItem(
-        "cart",
-        JSON.stringify([...cart, newItem])
-      );
+        quantity: 1,
+      });
     }
 
-    alert("Added to cart!");
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+
+    // 🔥 Trigger navbar update
+    window.dispatchEvent(new Event("storage"));
+
+    alert("Product added to cart ✅");
   };
 
-  if (!product) {
-    return <p className="p-6">Loading product...</p>;
-  }
+  if (loading) return <p className="p-6">Loading...</p>;
+
+  if (!product) return <p className="p-6">Product not found</p>;
 
   return (
-    <main className="p-6 flex gap-8">
-      <img
-        src={product.image}
-        alt={product.title}
-        className="h-64 object-contain"
-      />
+    <main className="p-6 max-w-4xl mx-auto">
+      <div className="flex gap-8">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="h-64 object-contain"
+        />
 
-      <div>
-        <h1 className="text-2xl font-bold mb-4">
-          {product.title}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold mb-4">
+            {product.title}
+          </h1>
 
-        <p className="mb-4">{product.description}</p>
+          <p className="text-lg mb-4">₹ {product.price}</p>
 
-        <h2 className="text-xl font-semibold mb-4">
-          ₹ {product.price}
-        </h2>
+          <p className="mb-4 text-gray-600">
+            {product.description}
+          </p>
 
-        <button
-          onClick={addToCart}
-          className="px-6 py-2 bg-black text-white"
-        >
-          Add to Cart
-        </button>
+          <button
+            onClick={addToCart}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
     </main>
   );
