@@ -6,38 +6,62 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
-    const storedOrders = JSON.parse(
-      localStorage.getItem("orders") || "[]"
-    );
-    setOrders(storedOrders);
+    const savedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    setOrders(savedOrders);
   }, []);
+
+  // 🔥 AMAZON STYLE DELIVERY DATE CALCULATION
+  const getDeliveryDate = (orderDate: string) => {
+    const date = new Date(orderDate);
+
+    // Add 5 days
+    date.setDate(date.getDate() + 5);
+
+    return date.toLocaleDateString("en-IN", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   if (orders.length === 0) {
     return (
       <main className="p-6">
-        <h1 className="text-2xl font-bold">
-          No orders placed yet.
-        </h1>
+        <h1 className="text-2xl font-bold">No orders placed yet.</h1>
       </main>
     );
   }
 
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        My Orders
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">My Orders</h1>
 
       {orders.map((order) => (
         <div
           key={order.id}
-          className="border p-4 mb-6 rounded"
+          className="border p-4 mb-6 rounded shadow-sm"
         >
           <p><strong>Order ID:</strong> {order.id}</p>
           <p><strong>Date:</strong> {order.date}</p>
-          <p><strong>Status:</strong> {order.status}</p>
+          <p>
+            <strong>Status:</strong>{" "}
+            <span className="text-green-600 font-semibold">
+              {order.status}
+            </span>
+          </p>
+
+          {/* ✅ DELIVERY DATE */}
+          <p>
+            <strong>Delivery By:</strong>{" "}
+            <span className="text-blue-600 font-semibold">
+              {getDeliveryDate(order.date)}
+            </span>
+          </p>
+
           <p><strong>Payment Mode:</strong> {order.paymentMode}</p>
-          <p className="font-bold">
+
+          <p className="font-bold mt-2">
             Total: ₹ {order.total.toFixed(2)}
           </p>
 
