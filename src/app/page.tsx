@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -24,11 +24,15 @@ export default function Home() {
 
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Products</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Products
+      </h1>
 
-      {/* Loading state */}
+      {/* 🔵 Loading Ring */}
       {loading && (
-        <p className="text-center text-gray-500">Loading products...</p>
+        <div className="flex justify-center items-center h-60">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+        </div>
       )}
 
       {/* Error state */}
@@ -56,7 +60,9 @@ export default function Home() {
                 {product.title}
               </h2>
 
-              <p className="font-bold mt-2">₹ {product.price}</p>
+              <p className="font-bold mt-2">
+                ₹ {product.price}
+              </p>
 
               <Link href={`/product/${product.id}`}>
                 <button className="mt-3 w-full bg-black text-white py-2 rounded">

@@ -18,16 +18,48 @@ export default function CheckoutPage() {
       return;
     }
 
-    setError("");
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    if (cart.length === 0) {
+      setError("Cart is empty!");
+      return;
+    }
+
+    const existingOrders = JSON.parse(
+      localStorage.getItem("orders") || "[]"
+    );
+
+    const total = cart.reduce(
+      (sum: number, item: any) =>
+        sum + item.price * item.quantity,
+      0
+    );
+
+    const newOrder = {
+      id: Date.now(),
+      date: new Date().toLocaleString(),
+      status: "Processing",
+      paymentMode: "Cash on Delivery",
+      total,
+      items: cart,
+    };
+
+    localStorage.setItem(
+      "orders",
+      JSON.stringify([...existingOrders, newOrder])
+    );
+
+    // 🔥 CLEAR CART
+    localStorage.setItem("cart", JSON.stringify([]));
+    window.dispatchEvent(new Event("storage"));
+
     setOrderPlaced(true);
+    setError("");
   };
 
-  // ✅ SUCCESS SCREEN
   if (orderPlaced) {
     return (
       <main style={{ padding: "40px", textAlign: "center" }}>
-        <h1>Checkout</h1>
-
         <img
           src="/cat-success.png"
           alt="Success Cat"
@@ -38,8 +70,27 @@ export default function CheckoutPage() {
           🎉 Order placed successfully!
         </h2>
 
+        <p style={{ marginTop: "10px" }}>
+          <strong>Status:</strong>{" "}
+          <span style={{ color: "green" }}>
+            Processing
+          </span>
+        </p>
+
+        <p>
+          <strong>Delivery By:</strong>{" "}
+          {new Date(
+            Date.now() + 5 * 24 * 60 * 60 * 1000
+          ).toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/orders")}
           style={{
             marginTop: "20px",
             padding: "10px 20px",
@@ -50,13 +101,12 @@ export default function CheckoutPage() {
             cursor: "pointer",
           }}
         >
-          Continue Shopping 🛍️
+          View Orders
         </button>
       </main>
     );
   }
 
-  // ✅ FORM SCREEN
   return (
     <main style={{ padding: "40px", maxWidth: "400px", margin: "auto" }}>
       <h1>Checkout</h1>
