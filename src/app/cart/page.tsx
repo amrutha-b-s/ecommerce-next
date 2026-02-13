@@ -22,43 +22,34 @@ export default function CartPage() {
     }
   }, []);
 
-  // Sync cart changes
+  // Save cart
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("storage"));
   }, [cart]);
 
   const increaseQty = (id: number) => {
-    setCart(cart.map(item =>
-      item.id === id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    ));
+    setCart(
+      cart.map((item) =>
+        item.id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
   };
 
   const decreaseQty = (id: number) => {
-    setCart(cart.map(item =>
-      item.id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    ));
+    setCart(
+      cart.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+    );
   };
 
   const removeItem = (id: number) => {
-    setCart(cart.filter(item => item.id !== id));
-  };
-
-  const saveForLater = (item: CartItem) => {
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-
-    // Avoid duplicate in wishlist
-    if (!wishlist.find((w: any) => w.id === item.id)) {
-      wishlist.push(item);
-      localStorage.setItem("wishlist", JSON.stringify(wishlist));
-    }
-
-    // Remove from cart
-    setCart(cart.filter(c => c.id !== item.id));
+    setCart(cart.filter((item) => item.id !== id));
   };
 
   const total = cart.reduce(
@@ -66,11 +57,18 @@ export default function CartPage() {
     0
   );
 
+  // If cart empty
   if (cart.length === 0) {
     return (
-      <main className="p-6">
+      <main className="p-6 text-center">
         <h1 className="text-3xl font-bold mb-4">Your Cart</h1>
-        <p>Cart is empty.</p>
+        <p className="mb-6">Cart is empty.</p>
+
+        <Link href="/">
+          <button className="px-6 py-2 bg-blue-600 text-white rounded">
+            Continue Shopping
+          </button>
+        </Link>
       </main>
     );
   }
@@ -79,7 +77,7 @@ export default function CartPage() {
     <main className="p-6">
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
 
-      {cart.map(item => (
+      {cart.map((item) => (
         <div
           key={item.id}
           className="border p-4 mb-4 flex items-center gap-4"
@@ -117,13 +115,6 @@ export default function CartPage() {
               >
                 Remove
               </button>
-
-              <button
-                onClick={() => saveForLater(item)}
-                className="ml-2 px-3 py-1 bg-blue-500 text-white"
-              >
-                Save for later
-              </button>
             </div>
           </div>
         </div>
@@ -133,10 +124,17 @@ export default function CartPage() {
         Total: ₹ {total.toFixed(2)}
       </h2>
 
-      <div className="flex gap-4 mt-4">
+      {/* UPDATED BUTTON SECTION */}
+      <div className="flex gap-4 mt-6">
+        <Link href="/">
+          <button className="px-6 py-2 bg-blue-600 text-white rounded">
+            Continue Shopping
+          </button>
+        </Link>
+
         <Link href="/checkout">
-          <button className="px-4 py-2 bg-green-600 text-white">
-            Proceed to Checkout
+          <button className="px-6 py-2 bg-green-600 text-white rounded">
+            Confirm & Checkout
           </button>
         </Link>
       </div>
