@@ -45,9 +45,12 @@ export default function CheckoutPage() {
       0
     );
 
+    // ✅ SAVE ISO DATE (VERY IMPORTANT FIX)
+    const orderDate = new Date().toISOString();
+
     const newOrder = {
       id: Date.now(),
-      date: new Date().toLocaleString("en-IN"),
+      date: orderDate, // ISO format
       status: "Processing",
       paymentMode,
       total,
@@ -68,10 +71,11 @@ export default function CheckoutPage() {
     window.dispatchEvent(new Event("storage"));
 
     // Delivery date (5 days later)
-    const date = new Date();
-    date.setDate(date.getDate() + 5);
+    const delivery = new Date(orderDate);
+    delivery.setDate(delivery.getDate() + 5);
+
     setDeliveryDate(
-      date.toLocaleDateString("en-IN", {
+      delivery.toLocaleDateString("en-IN", {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -82,14 +86,14 @@ export default function CheckoutPage() {
     setOrderPlaced(true);
   };
 
-  // ✅ SUCCESS SCREEN
+  // SUCCESS SCREEN
   if (orderPlaced) {
     return (
       <main className="p-8 text-center">
         <img
           src="/cat-success.png"
           alt="Success"
-          className="w-64 md:w-72 mx-auto mb-6"
+          className="w-72 mx-auto mb-6"
         />
 
         <h1 className="text-3xl font-bold text-green-600 mb-4">
@@ -124,7 +128,7 @@ export default function CheckoutPage() {
     );
   }
 
-  // ✅ FORM SCREEN
+  // FORM SCREEN
   return (
     <main className="p-8 max-w-md mx-auto">
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
@@ -167,6 +171,7 @@ export default function CheckoutPage() {
             {["COD", "UPI", "Card"].map((mode) => (
               <button
                 key={mode}
+                type="button"
                 onClick={() => setPaymentMode(mode)}
                 className={`px-4 py-2 border rounded ${
                   paymentMode === mode

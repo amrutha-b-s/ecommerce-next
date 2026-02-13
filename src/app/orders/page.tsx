@@ -10,11 +10,13 @@ export default function OrdersPage() {
     setOrders(savedOrders);
   }, []);
 
-  // 🔥 AMAZON STYLE DELIVERY DATE CALCULATION
   const getDeliveryDate = (orderDate: string) => {
     const date = new Date(orderDate);
 
-    // Add 5 days
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
     date.setDate(date.getDate() + 5);
 
     return date.toLocaleDateString("en-IN", {
@@ -43,7 +45,12 @@ export default function OrdersPage() {
           className="border p-4 mb-6 rounded shadow-sm"
         >
           <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Date:</strong> {order.date}</p>
+
+          <p>
+            <strong>Date:</strong>{" "}
+            {new Date(order.date).toLocaleString("en-IN")}
+          </p>
+
           <p>
             <strong>Status:</strong>{" "}
             <span className="text-green-600 font-semibold">
@@ -51,7 +58,6 @@ export default function OrdersPage() {
             </span>
           </p>
 
-          {/* ✅ DELIVERY DATE */}
           <p>
             <strong>Delivery By:</strong>{" "}
             <span className="text-blue-600 font-semibold">
@@ -62,11 +68,11 @@ export default function OrdersPage() {
           <p><strong>Payment Mode:</strong> {order.paymentMode}</p>
 
           <p className="font-bold mt-2">
-            Total: ₹ {order.total.toFixed(2)}
+            Total: ₹ {order.total?.toFixed(2)}
           </p>
 
           <div className="mt-3">
-            {order.items.map((item: any) => (
+            {order.items?.map((item: any) => (
               <div key={item.id}>
                 {item.title} (x{item.quantity})
               </div>
