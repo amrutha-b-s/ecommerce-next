@@ -89,7 +89,7 @@ export default function CheckoutPage() {
         <img
           src="/cat-success.png"
           alt="Success"
-          className="w-40 mx-auto mb-6"
+          className="w-64 md:w-72 mx-auto mb-6"
         />
 
         <h1 className="text-3xl font-bold text-green-600 mb-4">
