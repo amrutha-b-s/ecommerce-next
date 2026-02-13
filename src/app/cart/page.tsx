@@ -14,7 +14,7 @@ type CartItem = {
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // ✅ Load cart from localStorage on first render
+  // Load cart
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -22,7 +22,7 @@ export default function CartPage() {
     }
   }, []);
 
-  // ✅ Save cart whenever cart changes
+  // Sync cart changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("storage"));
@@ -46,6 +46,19 @@ export default function CartPage() {
 
   const removeItem = (id: number) => {
     setCart(cart.filter(item => item.id !== id));
+  };
+
+  const saveForLater = (item: CartItem) => {
+    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+
+    // Avoid duplicate in wishlist
+    if (!wishlist.find((w: any) => w.id === item.id)) {
+      wishlist.push(item);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+
+    // Remove from cart
+    setCart(cart.filter(c => c.id !== item.id));
   };
 
   const total = cart.reduce(
@@ -104,6 +117,13 @@ export default function CartPage() {
               >
                 Remove
               </button>
+
+              <button
+                onClick={() => saveForLater(item)}
+                className="ml-2 px-3 py-1 bg-blue-500 text-white"
+              >
+                Save for later
+              </button>
             </div>
           </div>
         </div>
@@ -114,12 +134,6 @@ export default function CartPage() {
       </h2>
 
       <div className="flex gap-4 mt-4">
-        <Link href="/review">
-          <button className="px-4 py-2 bg-blue-600 text-white">
-            Review Order
-          </button>
-        </Link>
-
         <Link href="/checkout">
           <button className="px-4 py-2 bg-green-600 text-white">
             Proceed to Checkout

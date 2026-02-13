@@ -4,11 +4,6 @@ import "./globals.css";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type CartItem = {
-  id: number;
-  quantity: number;
-};
-
 export default function RootLayout({
   children,
 }: {
@@ -17,24 +12,18 @@ export default function RootLayout({
   const [cartCount, setCartCount] = useState(0);
 
   const updateCartCount = () => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      const cart: CartItem[] = JSON.parse(savedCart);
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-      const totalQty = cart.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
+    const totalQty = cart.reduce(
+      (sum: number, item: any) => sum + item.quantity,
+      0
+    );
 
-      setCartCount(totalQty);
-    } else {
-      setCartCount(0);
-    }
+    setCartCount(totalQty);
   };
 
   useEffect(() => {
     updateCartCount();
-
     window.addEventListener("storage", updateCartCount);
 
     return () => {
@@ -50,6 +39,7 @@ export default function RootLayout({
           <Link href="/cart">Cart ({cartCount})</Link>
           <Link href="/review">Review</Link>
           <Link href="/checkout">Checkout</Link>
+          <Link href="/orders">Orders</Link>
         </nav>
 
         {children}
