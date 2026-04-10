@@ -6,16 +6,32 @@ import Link from "next/link";
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Fetch products
+  // ✅ FIXED FETCH (VERY IMPORTANT)
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("https://fakestoreapi.com/products", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch");
+        }
+
+        const data = await res.json();
         setProducts(data);
+      } catch (err) {
+        console.error(err);
+        setError(true);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // Add to cart
@@ -39,12 +55,12 @@ export default function Home() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  // Filter products based on search
+  // Filter
   const filteredProducts = products.filter((product) =>
     product.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Loading ring only
+  // Loading UI
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[80vh]">
@@ -53,18 +69,22 @@ export default function Home() {
     );
   }
 
+  // Error UI
+  if (error) {
+    return (
+      <p className="text-center mt-10 text-red-500">
+        Failed to load products. Please refresh.
+      </p>
+    );
+  }
+
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Products
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Products</h1>
 
       {/* SEARCH BAR */}
       <div className="relative max-w-md mx-auto mb-8">
-        <span className="absolute left-3 top-2.5 text-gray-400">
-          🔍
-        </span>
-
+        <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
         <input
           type="text"
           placeholder="Search products..."
@@ -91,9 +111,7 @@ export default function Home() {
               {product.title}
             </h2>
 
-            <p className="font-bold mt-2">
-              ₹ {product.price}
-            </p>
+            <p className="font-bold mt-2">₹ {product.price}</p>
 
             <button
               onClick={() => addToCart(product)}
@@ -111,6 +129,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* No products */}
       {filteredProducts.length === 0 && (
         <p className="text-center mt-6 text-gray-500">
           No products found.
