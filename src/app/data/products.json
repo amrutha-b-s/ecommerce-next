@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Backpack",
+    "price": 109.95,
+    "image": "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Mens T-Shirt",
+    "price": 22.3,
+    "image": "https://fakestoreapi.com/img/71-3HjGNDUL._AC_UL1275_.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Cotton Jacket",
+    "price": 55.99,
+    "image": "https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg"
+  },
+  {
+    "id": 4,
+    "title": "Casual Shirt",
+    "price": 15.99,
+    "image": "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Gold Ring",
+    "price": 695,
+    "image": "https://fakestoreapi.com/img/71ya+7hU6pL._AC_UL640_QL65_ML3_.jpg"
+  },
+  {
+    "id": 6,
+    "title": "Silver Ring",
+    "price": 168,
+    "image": "https://fakestoreapi.com/img/61SBaV3f0QL._AC_UL640_QL65_ML3_.jpg"
+  },
+  {
+    "id": 7,
+    "title": "SSD 1TB",
+    "price": 109,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7"
+  },
+  {
+    "id": 8,
+    "title": "SSD 256GB",
+    "price": 89,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea"
+  },
+  {
+    "id": 9,
+    "title": "Headphones",
+    "price": 59,
+    "image": "https://images.unsplash.com/photo-1518449037081-0b3c1f8f6c1f"
+  },
+  {
+    "id": 10,
+    "title": "Smart Watch",
+    "price": 120,
+    "image": "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b"
+  }
+]

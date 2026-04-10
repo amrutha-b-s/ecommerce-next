@@ -2,39 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import productsData from "./data/products.json";
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
 
-  // ✅ FIXED FETCH (VERY IMPORTANT)
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("https://fakestoreapi.com/products", {
-          cache: "no-store",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch");
-        }
-
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
+    setProducts(productsData);
   }, []);
 
-  // Add to cart
   const addToCart = (product: any) => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -55,51 +32,33 @@ export default function Home() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  // Filter
   const filteredProducts = products.filter((product) =>
     product.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Loading UI
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[80vh]">
-        <div className="w-14 h-14 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Error UI
-  if (error) {
-    return (
-      <p className="text-center mt-10 text-red-500">
-        Failed to load products. Please refresh.
-      </p>
-    );
-  }
-
   return (
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Products</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Products
+      </h1>
 
-      {/* SEARCH BAR */}
-      <div className="relative max-w-md mx-auto mb-8">
-        <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+      {/* SEARCH */}
+      <div className="max-w-md mx-auto mb-6">
         <input
           type="text"
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full border p-2 pl-10 rounded-md"
+          className="w-full border p-2 rounded"
         />
       </div>
 
-      {/* PRODUCTS GRID */}
+      {/* GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="border rounded-lg p-4 hover:shadow-lg transition"
+            className="border rounded-lg p-4 shadow-sm"
           >
             <img
               src={product.image}
@@ -107,11 +66,13 @@ export default function Home() {
               className="h-40 mx-auto object-contain"
             />
 
-            <h2 className="mt-3 text-sm font-semibold line-clamp-2">
+            <h2 className="mt-3 text-sm font-semibold">
               {product.title}
             </h2>
 
-            <p className="font-bold mt-2">₹ {product.price}</p>
+            <p className="font-bold mt-2">
+              ₹ {product.price}
+            </p>
 
             <button
               onClick={() => addToCart(product)}
@@ -129,7 +90,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* No products */}
       {filteredProducts.length === 0 && (
         <p className="text-center mt-6 text-gray-500">
           No products found.
